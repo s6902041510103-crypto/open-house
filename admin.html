@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open House Admin Dashboard (ระบบจัดการและลงข้อมูลสำหรับแอดมิน)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(243, 112, 33, 0.35);
+            padding: 1rem 1.5rem;
+            border-radius: 14px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        .admin-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .admin-badge {
+            background: var(--km-orange);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+        }
+        .admin-actions {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-bg"></div>
+    <div class="bg-pattern"></div>
+    <canvas id="antigravity-canvas"></canvas>
+
+    <div class="save-status-bar" id="save-status">
+        <span class="save-dot"></span>
+        <span>ระบบพร้อมใช้งาน (บันทึกข้อมูลเรียลไทม์)</span>
+    </div>
+
+    <main class="container">
+
+        <!-- แถบด้านบนของแอดมิน -->
+        <header class="admin-topbar">
+            <div>
+                <div class="admin-title">
+                    <span>🛠️</span>
+                    <span>ระบบจัดการข้อมูล Open House 2027</span>
+                    <span class="admin-badge">ADMIN PANEL</span>
+                </div>
+                <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+                    หน้านี้สำหรับคุณลงข้อมูลเท่านั้น (อาจารย์จะเข้าดูหน้ารายงานที่ลิงก์หน้าแรก /)
+                </div>
+            </div>
+
+            <div class="admin-actions">
+                <a href="/" target="_blank" class="btn btn-primary" title="เปิดดูหน้ารายงานของอาจารย์">
+                    👁️ เปิดดูหน้าอาจารย์ (/)
+                </a>
+                <button class="btn btn-secondary" onclick="exportData()" title="สำรองข้อมูลเป็นไฟล์">
+                    💾 สำรองข้อมูล (JSON)
+                </button>
+                <label class="btn btn-secondary" title="นำเข้าข้อมูลเดิม">
+                    📂 นำเข้าข้อมูล
+                    <input type="file" accept=".json" style="display:none;" onchange="importData(event)">
+                </label>
+            </div>
+        </header>
+
+        <!-- ภาพแบนเนอร์โปสเตอร์ 2 รูปต่อกัน -->
+        <section class="hero-banner-container glass-panel">
+            <img src="openhouse_banner.png" alt="KMUTNB Open House 2027 AI Plus EDUCATION" class="hero-banner-img">
+            <div class="banner-overlay-badge">
+                <div>
+                    <span class="banner-title-tag">✨ KMUTNB OPEN HOUSE 2027</span>
+                    <h2 style="font-size: 1.15rem; font-weight: 600; color: #ffffff; margin-top: 2px;">
+                        AI Plus EDUCATION — ภาควิชาคอมพิวเตอร์ศึกษา (Department of Computer Education)
+                    </h2>
+                </div>
+                <div class="banner-sub-tag">
+                    📍 แบนเนอร์แสดงในหน้ารายงานส่งอาจารย์
+                </div>
+            </div>
+        </section>
+
+        <!-- ฟอร์มข้อมูลส่วนตัวของนักศึกษา -->
+        <section id="profile-container"></section>
+
+        <!-- แท็บเลือกวัน -->
+        <nav class="day-nav-tabs" id="day-nav-tabs"></nav>
+
+        <!-- รายการลงข้อมูลประจำวัน (รูปภาพ + หน้าที่ความรับผิดชอบ) -->
+        <section class="days-container" id="days-container"></section>
+
+        <footer class="footer-section">
+            <p>ระบบจัดการรายงานปฏิบัติหน้าที่ <span class="footer-logo">KMUTNB OPEN HOUSE</span></p>
+            <p style="margin-top: 4px; font-size: 0.78rem;">ข้อมูลทั้งหมดจะซิงก์ไปยังหน้ารายงานของอาจารย์อัตโนมัติ</p>
+        </footer>
+    </main>
+
+    <!-- Lightbox ซูมดูรูป -->
+    <div class="lightbox-modal" id="lightbox-modal" onclick="closeLightbox()">
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <button class="lightbox-close-btn" onclick="closeLightbox()" title="ปิด">✕</button>
+            <img src="" alt="ภาพขยาย" class="lightbox-img" id="lightbox-img">
+            <div class="lightbox-caption" id="lightbox-caption"></div>
+        </div>
+    </div>
+
+    <!-- โหลดสคริปต์แอดมิน -->
+    <script src="script.js"></script>
+</body>
+</html>

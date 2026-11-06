@@ -63,12 +63,17 @@ function loadData() {
     }
 }
 
+const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('kmutnb_openhouse_sync') : null;
+
 // Save Data
 function saveData(showNotice = true) {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
         if (showNotice) {
-            flashSaveNotice('บันทึกข้อมูลเรียบร้อยแล้ว ✓');
+            flashSaveNotice('บันทึกข้อมูลและซิงก์เรียลไทม์แล้ว ✓');
+        }
+        if (syncChannel) {
+            syncChannel.postMessage({ type: 'DATA_UPDATED', data: appData });
         }
     } catch (e) {
         console.warn("Storage quota may be reached:", e);
