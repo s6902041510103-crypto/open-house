@@ -2,91 +2,14 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ระบบจัดการและแก้ไขข้อมูล Open House (สำหรับนักศึกษา)</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta http-equiv="refresh" content="0; url=index.html?edit=true">
+    <title>เข้าสู่โหมดแก้ไขข้อมูลแบบเรียลไทม์...</title>
+    <script>
+        window.location.replace("index.html?edit=true");
+    </script>
 </head>
-<body>
-    <div class="ambient-bg"></div>
-    <div class="bg-pattern"></div>
-    <canvas id="antigravity-canvas"></canvas>
-
-    <!-- แจ้งเตือนสถานะการบันทึก -->
-    <div class="save-status-bar" id="save-status">
-        <span class="save-dot"></span>
-        <span>ระบบพร้อมใช้งาน (บันทึกข้อมูลอัตโนมัติ)</span>
-    </div>
-
-    <main class="container">
-
-        <!-- ภาพแบนเนอร์โปสเตอร์ 2 รูปต่อกัน -->
-        <header class="hero-banner-container glass-panel">
-            <img src="openhouse_banner.png" alt="KMUTNB Open House 2027 AI Plus EDUCATION" class="hero-banner-img">
-            <div class="banner-overlay-badge">
-                <div>
-                    <span class="banner-title-tag">🛠️ ระบบจัดการข้อมูลสำหรับนักศึกษา</span>
-                    <h2 style="font-size: 1.15rem; font-weight: 600; color: #ffffff; margin-top: 2px;">
-                        บันทึกหน้าที่การปฏิบัติงาน Open House 2027 (ภาควิชาคอมพิวเตอร์ศึกษา มจพ.)
-                    </h2>
-                </div>
-                <div class="banner-sub-tag">
-                    📍 ใส่รูปและพิมพ์หน้าที่ประจำวัน ระบบจะบันทึกอัตโนมัติ
-                </div>
-            </div>
-        </header>
-
-        <!-- แถบควบคุมของนักศึกษา -->
-        <section class="glass-panel toolbar-container">
-            <div style="display:flex; align-items:center; gap: 0.75rem; flex-wrap: wrap;">
-                <span class="mode-indicator edit-mode">
-                    ✏️ หน้าแก้ไขข้อมูล (Student Editor)
-                </span>
-                <span style="font-size: 0.82rem; color: var(--text-muted);">
-                    (หน้านี้สำหรับคุณเท่านั้น อาจารย์จะไม่สามารถเห็นหน้านี้ได้)
-                </span>
-            </div>
-
-            <div class="toolbar-actions">
-                <a href="report.html" target="_blank" class="btn btn-primary" title="เปิดดูหน้าส่งอาจารย์">
-                    📄 เปิดหน้ารายงานส่งอาจารย์ (report.html)
-                </a>
-                <button class="btn btn-secondary" onclick="exportData()" title="สำรองข้อมูลเก็บไว้ในเครื่อง">
-                    💾 สำรองข้อมูล (JSON)
-                </button>
-                <label class="btn btn-secondary" title="นำเข้าข้อมูลที่เคยสำรองไว้">
-                    📂 นำเข้าข้อมูล
-                    <input type="file" accept=".json" style="display:none;" onchange="importData(event)">
-                </label>
-            </div>
-        </section>
-
-        <!-- ฟอร์มข้อมูลนักศึกษา -->
-        <section id="profile-container"></section>
-
-        <!-- แท็บสลับดูแต่ละวัน -->
-        <nav class="day-nav-tabs" id="day-nav-tabs"></nav>
-
-        <!-- รายการแต่ละวัน (ใส่รูป + หน้าที่ความรับผิดชอบ) -->
-        <section class="days-container" id="days-container"></section>
-
-        <footer class="footer-section">
-            <p>ระบบจัดการรายงานปฏิบัติหน้าที่ <span class="footer-logo">KMUTNB OPEN HOUSE</span></p>
-            <p style="margin-top: 4px; font-size: 0.78rem;">กดปุ่มสีส้มด้านบนเพื่อเปิดดูหน้าส่งอาจารย์</p>
-        </footer>
-    </main>
-
-    <!-- Lightbox ซูมดูรูป -->
-    <div class="lightbox-modal" id="lightbox-modal" onclick="closeLightbox()">
-        <div class="lightbox-content" onclick="event.stopPropagation()">
-            <button class="lightbox-close-btn" onclick="closeLightbox()" title="ปิด">✕</button>
-            <img src="" alt="ภาพขยาย" class="lightbox-img" id="lightbox-img">
-            <div class="lightbox-caption" id="lightbox-caption"></div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+<body style="background:#f1f5f9; font-family:sans-serif; text-align:center; padding-top:20vh;">
+    <p>กำลังเปิดโหมดแก้ไขข้อมูลแบบเรียลไทม์...</p>
+    <p><a href="index.html?edit=true">คลิกที่นี่หากไม่เปลี่ยนหน้าอัตโนมัติ</a></p>
 </body>
 </html>

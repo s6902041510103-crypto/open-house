@@ -28,10 +28,10 @@
             background-color: #f1f5f9;
             color: var(--text-main);
             line-height: 1.6;
-            padding: 2rem 1rem;
+            padding: 1.5rem 1rem 3rem 1rem;
         }
 
-        /* Top Action Bar (เฉพาะปุ่มพิมพ์รายงานสำหรับอาจารย์/นักศึกษา ไม่มีปุ่มไปหน้าแก้ไข) */
+        /* Top Action Bar */
         .top-action-bar {
             max-width: 900px;
             margin: 0 auto 1.5rem auto;
@@ -41,7 +41,7 @@
             flex-wrap: wrap;
             gap: 1rem;
             background: #ffffff;
-            padding: 0.85rem 1.5rem;
+            padding: 0.85rem 1.25rem;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.06);
             border: 1px solid var(--border-color);
@@ -56,21 +56,46 @@
             gap: 0.5rem;
         }
 
-        .btn-print {
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
-            padding: 0.55rem 1.25rem;
+            padding: 0.5rem 1rem;
             font-family: inherit;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 600;
             border-radius: 8px;
             cursor: pointer;
             border: none;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-edit-toggle {
+            background: #f1f5f9;
+            color: var(--km-dark);
+            border: 1px solid var(--border-color);
+        }
+        .btn-edit-toggle:hover {
+            background: #e2e8f0;
+        }
+        .btn-edit-toggle.active {
+            background: #fff7ed;
+            color: var(--km-orange);
+            border-color: #fed7aa;
+        }
+
+        .btn-print {
             background: var(--km-orange);
             color: #ffffff;
             box-shadow: 0 4px 12px rgba(243, 112, 33, 0.3);
-            transition: all 0.2s ease;
         }
         .btn-print:hover {
             background: #d95e14;
@@ -86,6 +111,40 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             border: 1px solid var(--border-color);
             padding: 2.5rem 3rem;
+            position: relative;
+        }
+
+        /* แจ้งเตือนการซิงก์แบบ Real-time */
+        .sync-toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: rgba(15, 23, 42, 0.9);
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        .sync-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
         }
 
         /* หัวกระดาษเอกสาร */
@@ -158,14 +217,37 @@
             gap: 1.5rem;
         }
 
-        .student-avatar {
+        .student-avatar-box {
+            position: relative;
             width: 90px;
             height: 90px;
+            flex-shrink: 0;
+        }
+
+        .student-avatar {
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid var(--km-orange);
-            flex-shrink: 0;
             background: #e2e8f0;
+        }
+
+        .avatar-edit-overlay {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--km-orange);
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid white;
+            font-size: 0.75rem;
         }
 
         .student-grid {
@@ -186,6 +268,52 @@
             font-size: 0.95rem;
             color: var(--text-main);
             font-weight: 600;
+        }
+
+        /* กล่องแก้ไขแบบเรียลไทม์ (Live Input) */
+        .live-input, .live-textarea {
+            width: 100%;
+            font-family: inherit;
+            font-size: inherit;
+            font-weight: inherit;
+            color: inherit;
+            border: 1px solid transparent;
+            background: transparent;
+            border-radius: 6px;
+            padding: 0.2rem 0.4rem;
+            transition: all 0.2s ease;
+        }
+
+        /* เมื่ออยู่ในโหมดแก้ไข */
+        body.edit-mode-active .live-input,
+        body.edit-mode-active .live-textarea {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        body.edit-mode-active .live-input:focus,
+        body.edit-mode-active .live-textarea:focus {
+            outline: none;
+            border-color: var(--km-orange);
+            box-shadow: 0 0 0 3px rgba(243, 112, 33, 0.2);
+        }
+        body.edit-mode-active .avatar-edit-overlay,
+        body.edit-mode-active .edit-only-control {
+            display: flex !important;
+        }
+
+        /* เมื่ออยู่ในโหมดส่งอาจารย์ (ค่าเริ่มต้น) */
+        body:not(.edit-mode-active) .edit-only-control {
+            display: none !important;
+        }
+        body:not(.edit-mode-active) .live-input,
+        body:not(.edit-mode-active) .live-textarea {
+            pointer-events: none;
+            resize: none;
+            padding: 0;
+            border-color: transparent !important;
+            background: transparent !important;
+            box-shadow: none !important;
         }
 
         /* ภาพรวม */
@@ -211,7 +339,7 @@
             line-height: 1.7;
         }
 
-        /* รายละเอียดกิจกรรมรายวัน (Daily Log Section) */
+        /* รายละเอียดกิจกรรมรายวัน */
         .section-header-academic {
             font-size: 1.25rem;
             font-weight: 700;
@@ -221,6 +349,8 @@
             border-bottom: 2px solid #cbd5e1;
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
             gap: 0.5rem;
         }
 
@@ -264,7 +394,7 @@
             color: var(--text-muted);
         }
 
-        /* แกลเลอรีรูปภาพในรายงานส่งอาจารย์ */
+        /* แกลเลอรีรูปภาพ */
         .report-photo-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -280,6 +410,7 @@
             display: flex;
             flex-direction: column;
             page-break-inside: avoid;
+            position: relative;
         }
 
         .report-photo-card img {
@@ -287,14 +418,52 @@
             height: 190px;
             object-fit: cover;
             display: block;
+            cursor: pointer;
         }
 
         .report-photo-caption {
-            padding: 0.6rem 0.75rem;
+            padding: 0.5rem 0.75rem;
             font-size: 0.85rem;
             color: #475569;
             background: #ffffff;
             border-top: 1px solid var(--border-color);
+        }
+
+        .photo-delete-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* ปุ่มเพิ่มรูปภาพในโหมดแก้ไข */
+        .add-photo-dropzone {
+            border: 2px dashed #cbd5e1;
+            background: #f8fafc;
+            border-radius: 8px;
+            min-height: 190px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        .add-photo-dropzone:hover {
+            border-color: var(--km-orange);
+            background: #fff7ed;
         }
 
         /* ส่วนแสดงเฉพาะหน้าที่และความรับผิดชอบ */
@@ -324,71 +493,67 @@
             white-space: pre-wrap;
         }
 
+        /* Lightbox Modal */
+        .lightbox-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.9);
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .lightbox-modal.active { display: flex; }
+        .lightbox-modal img {
+            max-width: 90vw;
+            max-height: 85vh;
+            border-radius: 8px;
+        }
+
         /* Mobile */
         @media (max-width: 768px) {
-            body {
-                padding: 0.75rem 0.5rem;
-            }
-            .paper-container {
-                padding: 1.25rem 1rem;
-            }
-            .student-info-section {
-                flex-direction: column;
-                text-align: center;
-            }
-            .student-grid {
-                grid-template-columns: 1fr;
-                text-align: left;
-            }
-            .report-photo-grid {
-                grid-template-columns: 1fr;
-            }
-            .top-action-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .btn-print {
-                width: 100%;
-                justify-content: center;
-            }
+            body { padding: 0.75rem 0.5rem; }
+            .paper-container { padding: 1.25rem 1rem; }
+            .student-info-section { flex-direction: column; text-align: center; }
+            .student-grid { grid-template-columns: 1fr; text-align: left; }
+            .report-photo-grid { grid-template-columns: 1fr; }
+            .top-action-bar { flex-direction: column; align-items: stretch; }
+            .action-buttons { width: 100%; justify-content: stretch; }
+            .btn { flex: 1; justify-content: center; }
         }
 
         /* Print Media Styles */
         @media print {
-            body {
-                background: #ffffff !important;
-                padding: 0 !important;
-            }
-            .top-action-bar {
+            body { background: #ffffff !important; padding: 0 !important; }
+            .top-action-bar, .sync-toast, .edit-only-control, .avatar-edit-overlay, .photo-delete-badge, .add-photo-dropzone {
                 display: none !important;
             }
-            .paper-container {
-                box-shadow: none !important;
-                border: none !important;
-                padding: 0 !important;
-                max-width: 100% !important;
-            }
-            .btn-print {
-                display: none !important;
-            }
-            .banner-wrapper img {
-                max-height: 250px;
-                object-fit: contain;
-            }
+            .paper-container { box-shadow: none !important; border: none !important; padding: 0 !important; max-width: 100% !important; }
+            .banner-wrapper img { max-height: 250px; object-fit: contain; }
         }
     </style>
 </head>
 <body>
 
-    <!-- แถบด้านบนสำหรับอาจารย์ / ส่งงาน (ไม่มีปุ่มไปหน้าแก้ไข) -->
+    <!-- แจ้งเตือนเซฟข้อมูลแบบ Realtime -->
+    <div class="sync-toast" id="sync-toast">
+        <span class="sync-dot"></span>
+        <span id="sync-toast-text">บันทึกเรียลไทม์เรียบร้อย ✓</span>
+    </div>
+
+    <!-- แถบด้านบน: ปรับเป็นลิงก์เดียว จบครบทั้งโหมดส่งอาจารย์ และโหมดแก้ไขแบบเรียลไทม์ -->
     <header class="top-action-bar">
         <div class="action-title">
-            <span>📄</span>
-            <span>รายงานผลการปฏิบัติหน้าที่ KMUTNB OPEN HOUSE 2027 (ฉบับส่งอาจารย์)</span>
+            <span id="mode-icon">🔒</span>
+            <span id="mode-text-title">รายงานฉบับส่งอาจารย์ (Official Report)</span>
         </div>
-        <div>
-            <button onclick="window.print()" class="btn-print">
-                🖨️ พิมพ์รายงาน / บันทึกเป็น PDF
+        <div class="action-buttons">
+            <button onclick="toggleRealtimeEdit()" class="btn btn-edit-toggle" id="btn-toggle-edit">
+                ✏️ แก้ไขข้อมูล (เรียลไทม์)
+            </button>
+            <button onclick="window.print()" class="btn btn-print">
+                🖨️ พิมพ์ / บันทึก PDF
             </button>
         </div>
     </header>
@@ -410,162 +575,388 @@
         </figure>
 
         <!-- ข้อมูลนักศึกษาผู้จัดทำ -->
-        <section class="student-info-section" id="student-info-box">
-            <!-- โหลดข้อมูลจาก JavaScript -->
-        </section>
+        <section class="student-info-section" id="student-info-box"></section>
 
         <!-- วัตถุประสงค์และสรุปภาพรวม -->
         <section class="summary-box">
             <h2 class="summary-title">📌 วัตถุประสงค์และสรุปภาพรวมการปฏิบัติงาน</h2>
-            <p class="summary-text" id="report-summary-text"></p>
+            <textarea class="live-textarea summary-text" id="report-summary-text" rows="2" placeholder="อธิบายภาพรวมกิจกรรม..." oninput="updateProfileField('summary', this.value)"></textarea>
         </section>
 
         <!-- รายการบันทึกผลการปฏิบัติงานแต่ละวัน (แสดงเฉพาะหน้าที่) -->
         <section>
-            <h2 class="section-header-academic">
-                <span>📅</span>
-                <span>บันทึกการปฏิบัติหน้าที่และภาพกิจกรรมประจำวัน</span>
-            </h2>
-
-            <div id="academic-days-list">
-                <!-- วนซ้ำแสดงข้อมูลของแต่ละวัน -->
+            <div class="section-header-academic">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <span>📅</span>
+                    <span>บันทึกการปฏิบัติหน้าที่และภาพกิจกรรมประจำวัน</span>
+                </div>
+                <button class="btn btn-edit-toggle edit-only-control" onclick="addNewDay()" style="font-size:0.8rem; padding:0.35rem 0.75rem;">
+                    ➕ เพิ่มวันถัดไป
+                </button>
             </div>
+
+            <div id="academic-days-list"></div>
         </section>
 
     </main>
 
+    <!-- Modal ดูรูปภาพขนาดเต็ม -->
+    <div class="lightbox-modal" id="lightbox-modal" onclick="this.classList.remove('active')">
+        <img src="" id="lightbox-img" alt="ภาพขยาย">
+    </div>
+
     <script>
         const STORAGE_KEY = 'kmutnb_openhouse_report_data_v2';
+        const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('kmutnb_live_sync') : null;
+
+        // Default template data
+        const defaultData = {
+            student: {
+                name: "ศุกลภัทร สุเมธรัตน์",
+                studentId: "6x-xxxx-xxxx-x",
+                faculty: "คณะครุศาสตร์อุตสาหกรรม",
+                department: "ภาควิชาคอมพิวเตอร์ศึกษา (TCT)",
+                subject: "รายงานผลการปฏิบัติงาน KMUTNB Open House 2027",
+                teacher: "อาจารย์ประจำวิชา / ผู้ประเมินผล",
+                eventDate: "6 - 7 พฤศจิกายน 2569",
+                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
+                summary: "รายงานผลการเข้าร่วมปฏิบัติหน้าที่และการจัดแสดงผลงานนวัตกรรม ในงานเปิดบ้านวิชาการมหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ (KMUTNB Open House 2027) ภายใต้แนวคิด AI Plus EDUCATION โดยภาควิชาคอมพิวเตอร์ศึกษา (TCT)"
+            },
+            days: [
+                {
+                    id: 'day-1',
+                    dayNum: 'DAY 1',
+                    date: '6 พฤศจิกายน 2569',
+                    title: 'เตรียมความพร้อม & จัดระบบบูธนิทรรศการ',
+                    duty: 'จัดเตรียมสถานที่ ติดตั้งเครื่องคอมพิวเตอร์ โครงงานสื่อการสอน AI และระบบเครือข่ายสำหรับบูธภาควิชาคอมพิวเตอร์ศึกษา (TCT) เพื่อให้พร้อมรับนักเรียนและผู้ปกครอง',
+                    photos: []
+                },
+                {
+                    id: 'day-2',
+                    dayNum: 'DAY 2',
+                    date: '7 พฤศจิกายน 2569',
+                    title: 'นำเสนอผลงาน & ประชาสัมพันธ์หลักสูตร',
+                    duty: 'สาธิตนวัตกรรม AI Plus EDUCATION และโครงงานของภาควิชา แนะนำแนวทางการศึกษาต่อในหลักสูตรครุศาสตร์อุตสาหกรรม และตอบข้อซักถามแก่นักเรียนระดับมัธยมศึกษาและอาชีวศึกษา',
+                    photos: []
+                },
+                {
+                    id: 'day-3',
+                    dayNum: 'DAY 3 / สรุปผล',
+                    date: '7 พฤศจิกายน 2569 (ช่วงปิดงาน)',
+                    title: 'สรุปผลการจัดงาน & รื้อถอนพื้นที่',
+                    duty: 'รวบรวมแบบประเมินความพึงพอใจของผู้เข้าร่วมชมงาน ตรวจนับและรื้อถอนอุปกรณ์คอมพิวเตอร์ สื่อการแสดง พร้อมทำความสะอาดส่งมอบพื้นที่ให้เรียบร้อย',
+                    photos: []
+                }
+            ]
+        };
+
+        let appData = null;
+        let isEditMode = false;
+
+        function loadData() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    appData = JSON.parse(saved);
+                } else {
+                    appData = JSON.parse(JSON.stringify(defaultData));
+                    saveData(false);
+                }
+            } catch (e) {
+                appData = JSON.parse(JSON.stringify(defaultData));
+            }
+        }
+
+        function saveData(triggerSync = true) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+                if (triggerSync) {
+                    showSyncToast('บันทึกเรียลไทม์เรียบร้อย ✓');
+                    if (syncChannel) syncChannel.postMessage({ type: 'UPDATE_DATA', data: appData });
+                }
+            } catch (e) {
+                showSyncToast('⚠️ พื้นที่จัดเก็บเต็ม กรุณาลดขนาดรูปภาพ');
+            }
+        }
+
+        function showSyncToast(text) {
+            const toast = document.getElementById('sync-toast');
+            const txt = document.getElementById('sync-toast-text');
+            if (!toast) return;
+            txt.innerText = text;
+            toast.classList.add('show');
+            clearTimeout(window._toastTimeout);
+            window._toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // ฟังการอัปเดตจากแท็บอื่นแบบเรียลไทม์
+        if (syncChannel) {
+            syncChannel.onmessage = (e) => {
+                if (e.data && e.data.type === 'UPDATE_DATA') {
+                    appData = e.data.data;
+                    renderAll();
+                    showSyncToast('ซิงก์ข้อมูลเรียลไทม์ทันที ⚡');
+                }
+            };
+        }
+        window.addEventListener('storage', (e) => {
+            if (e.key === STORAGE_KEY && e.newValue) {
+                appData = JSON.parse(e.newValue);
+                renderAll();
+            }
+        });
+
+        // สลับโหมดแก้ไขเรียลไทม์
+        window.toggleRealtimeEdit = function() {
+            isEditMode = !isEditMode;
+            document.body.classList.toggle('edit-mode-active', isEditMode);
+            const btn = document.getElementById('btn-toggle-edit');
+            const icon = document.getElementById('mode-icon');
+            const title = document.getElementById('mode-text-title');
+
+            if (isEditMode) {
+                btn.innerHTML = '🔒 ล็อกโหมดส่งอาจารย์ (เสร็จสิ้น)';
+                btn.classList.add('active');
+                icon.innerText = '✏️';
+                title.innerText = 'กำลังแก้ไขข้อมูลแบบเรียลไทม์ (คลิกพิมพ์ได้ทันที)';
+                showSyncToast('เปิดโหมดแก้ไขแล้ว แก้ข้อความได้ทันที ✏️');
+            } else {
+                btn.innerHTML = '✏️ แก้ไขข้อมูล (เรียลไทม์)';
+                btn.classList.remove('active');
+                icon.innerText = '🔒';
+                title.innerText = 'รายงานฉบับส่งอาจารย์ (Official Report)';
+                showSyncToast('ล็อกโหมดส่งอาจารย์เรียบร้อย 🔒');
+            }
+        };
+
+        function renderProfile() {
+            const p = appData.student || {};
+            document.getElementById('student-info-box').innerHTML = `
+                <div class="student-avatar-box">
+                    <img src="${p.avatar || 'https://via.placeholder.com/150'}" alt="${p.name}" class="student-avatar" id="avatar-img">
+                    <label class="avatar-edit-overlay edit-only-control" title="เปลี่ยนรูปโปรไฟล์">
+                        📷
+                        <input type="file" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
+                    </label>
+                </div>
+                <div class="student-grid">
+                    <div>
+                        <div class="info-cell-label">ชื่อ - นามสกุล นักศึกษา:</div>
+                        <input type="text" class="live-input info-cell-value" value="${p.name || ''}" placeholder="ชื่อ - นามสกุล" oninput="updateProfileField('name', this.value)">
+                    </div>
+                    <div>
+                        <div class="info-cell-label">รหัสนักศึกษา:</div>
+                        <input type="text" class="live-input info-cell-value" value="${p.studentId || ''}" placeholder="รหัสนักศึกษา" oninput="updateProfileField('studentId', this.value)">
+                    </div>
+                    <div>
+                        <div class="info-cell-label">ภาควิชา / คณะ:</div>
+                        <input type="text" class="live-input info-cell-value" value="${p.department || ''}" placeholder="ภาควิชา / สาขา" oninput="updateProfileField('department', this.value)">
+                    </div>
+                    <div>
+                        <div class="info-cell-label">วิชาที่นำส่ง:</div>
+                        <input type="text" class="live-input info-cell-value" value="${p.subject || ''}" placeholder="ชื่อวิชา" oninput="updateProfileField('subject', this.value)">
+                    </div>
+                    <div>
+                        <div class="info-cell-label">อาจารย์ผู้สอน / ที่ปรึกษา:</div>
+                        <input type="text" class="live-input info-cell-value" value="${p.teacher || ''}" placeholder="ชื่ออาจารย์" oninput="updateProfileField('teacher', this.value)">
+                    </div>
+                    <div>
+                        <div class="info-cell-label">วันที่จัดกิจกรรม:</div>
+                        <input type="text" class="live-input info-cell-value" value="${p.eventDate || '6 - 7 พฤศจิกายน 2569'}" placeholder="วันที่จัดกิจกรรม" oninput="updateProfileField('eventDate', this.value)">
+                    </div>
+                </div>
+            `;
+            document.getElementById('report-summary-text').value = p.summary || '';
+        }
+
+        window.updateProfileField = function(key, val) {
+            appData.student[key] = val;
+            saveData();
+        };
+
+        window.handleAvatarUpload = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            compressImage(file, 400, 0.85).then(compressed => {
+                appData.student.avatar = compressed;
+                saveData();
+                renderProfile();
+            });
+        };
+
+        function renderDays() {
+            const container = document.getElementById('academic-days-list');
+            if (!container) return;
+
+            container.innerHTML = (appData.days || []).map((d) => {
+                const photos = d.photos || [];
+                const photosHtml = photos.map((photo, idx) => `
+                    <div class="report-photo-card">
+                        <img src="${photo.src}" alt="ภาพกิจกรรม" onclick="openLightbox('${photo.src}')">
+                        <div class="report-photo-caption">
+                            <strong>รูปที่ ${idx + 1}:</strong>
+                            <input type="text" class="live-input" style="display:inline-block; width:calc(100% - 60px);" value="${photo.caption || ''}" placeholder="คำบรรยายรูปนี้..." oninput="updatePhotoCaption('${d.id}', ${idx}, this.value)">
+                        </div>
+                        <button class="photo-delete-badge edit-only-control" title="ลบรูปนี้" onclick="deletePhoto('${d.id}', ${idx})">✕</button>
+                    </div>
+                `).join('');
+
+                return `
+                    <article class="day-block" id="${d.id}">
+                        <div class="day-title-row">
+                            <div style="display:flex; align-items:center; gap:0.6rem; flex:1;">
+                                <span class="day-badge-academic">${d.dayNum || 'DAY'}</span>
+                                <input type="text" class="live-input day-name-academic" value="${d.title || ''}" placeholder="หัวข้อประจำวัน" oninput="updateDayField('${d.id}', 'title', this.value)">
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <span style="font-size:0.85rem; color:#64748b;">📅</span>
+                                <input type="text" class="live-input day-date-academic" style="max-width:180px;" value="${d.date || ''}" placeholder="ระบุวันที่" oninput="updateDayField('${d.id}', 'date', this.value)">
+                                ${appData.days.length > 1 ? `
+                                    <button class="btn btn-edit-toggle edit-only-control" style="color:#ef4444; padding:0.2rem 0.5rem; font-size:0.75rem;" onclick="removeDay('${d.id}')">ลบวันนี้</button>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <div class="report-photo-grid">
+                            ${photosHtml}
+                            <!-- กล่องเพิ่มรูปภาพ -->
+                            <div class="add-photo-dropzone edit-only-control" onclick="document.getElementById('input-photo-${d.id}').click()">
+                                <span style="font-size:1.8rem; color:var(--km-orange);">📷</span>
+                                <div style="font-size:0.9rem; font-weight:600; color:var(--km-dark); margin-top:4px;">+ เพิ่มรูปภาพของวันนี้</div>
+                                <div style="font-size:0.75rem; color:#94a3b8;">แตะหรือคลิกเพื่อเลือกภาพ</div>
+                                <input type="file" id="input-photo-${d.id}" accept="image/*" multiple style="display:none;" onchange="handlePhotosUpload('${d.id}', event)">
+                            </div>
+                        </div>
+
+                        <!-- ส่วนหน้าที่และความรับผิดชอบเท่านั้น -->
+                        <div class="duty-box">
+                            <div class="duty-label">📌 หน้าที่และความรับผิดชอบ:</div>
+                            <textarea class="live-textarea duty-content" rows="3" placeholder="พิมพ์อธิบายหน้าที่และกิจกรรมที่คุณทำในวันนี้..." oninput="updateDayField('${d.id}', 'duty', this.value)">${d.duty || ''}</textarea>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        window.updateDayField = function(dayId, field, val) {
+            const day = appData.days.find(d => d.id === dayId);
+            if (day) {
+                day[field] = val;
+                saveData();
+            }
+        };
+
+        window.handlePhotosUpload = async function(dayId, event) {
+            const files = Array.from(event.target.files);
+            if (!files.length) return;
+            const day = appData.days.find(d => d.id === dayId);
+            if (!day) return;
+            if (!day.photos) day.photos = [];
+
+            showSyncToast('กำลังโหลดและบันทึกรูปภาพ...');
+            for (const file of files) {
+                try {
+                    const compressed = await compressImage(file, 1280, 0.82);
+                    day.photos.push({
+                        id: Date.now() + Math.random().toString(),
+                        src: compressed,
+                        caption: file.name.replace(/\.[^/.]+$/, "")
+                    });
+                } catch (e) {}
+            }
+            saveData();
+            renderDays();
+            event.target.value = '';
+        };
+
+        window.deletePhoto = function(dayId, idx) {
+            if (!confirm('ต้องการลบภาพนี้ใช่หรือไม่?')) return;
+            const day = appData.days.find(d => d.id === dayId);
+            if (day && day.photos) {
+                day.photos.splice(idx, 1);
+                saveData();
+                renderDays();
+            }
+        };
+
+        window.updatePhotoCaption = function(dayId, idx, caption) {
+            const day = appData.days.find(d => d.id === dayId);
+            if (day && day.photos && day.photos[idx]) {
+                day.photos[idx].caption = caption;
+                saveData();
+            }
+        };
+
+        window.addNewDay = function() {
+            const next = appData.days.length + 1;
+            appData.days.push({
+                id: 'day-' + Date.now(),
+                dayNum: `DAY ${next}`,
+                date: `วันที่จัดกิจกรรมวันที่ ${next}`,
+                title: `กิจกรรมและการปฏิบัติหน้าที่วันที่ ${next}`,
+                duty: 'ระบุหน้าที่และความรับผิดชอบในวันนี้',
+                photos: []
+            });
+            saveData();
+            renderDays();
+        };
+
+        window.removeDay = function(dayId) {
+            if (!confirm('ต้องการลบวันนี้ใช่หรือไม่?')) return;
+            appData.days = appData.days.filter(d => d.id !== dayId);
+            saveData();
+            renderDays();
+        };
+
+        function compressImage(file, maxDimension = 1200, quality = 0.8) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        let w = img.width, h = img.height;
+                        if (w > maxDimension || h > maxDimension) {
+                            if (w > h) { h = Math.round((h * maxDimension) / w); w = maxDimension; }
+                            else { w = Math.round((w * maxDimension) / h); h = maxDimension; }
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w; canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = reject;
+                };
+                reader.onerror = reject;
+            });
+        }
+
+        window.openLightbox = function(src) {
+            const modal = document.getElementById('lightbox-modal');
+            const img = document.getElementById('lightbox-img');
+            img.src = src;
+            modal.classList.add('active');
+        };
+
+        function renderAll() {
+            renderProfile();
+            renderDays();
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date();
             const dateStr = today.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
             document.getElementById('doc-meta-date').innerText = `เอกสารฉบับทางการ | ออกรายงาน ณ วันที่ ${dateStr}`;
 
-            let data = null;
-            try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    data = JSON.parse(saved);
-                }
-            } catch (e) {
-                console.error("Failed to load data", e);
-            }
+            loadData();
+            renderAll();
 
-            if (!data) {
-                data = {
-                    student: {
-                        name: "ศุกลภัทร สุเมธรัตน์",
-                        studentId: "6x-xxxx-xxxx-x",
-                        faculty: "คณะครุศาสตร์อุตสาหกรรม",
-                        department: "ภาควิชาคอมพิวเตอร์ศึกษา (TCT)",
-                        subject: "รายงานผลการปฏิบัติงาน KMUTNB Open House 2027",
-                        teacher: "อาจารย์ประจำวิชา / ผู้ประเมินผล",
-                        eventDate: "6 - 7 พฤศจิกายน 2569",
-                        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
-                        summary: "รายงานผลการเข้าร่วมปฏิบัติหน้าที่และการจัดแสดงผลงานนวัตกรรม ในงานเปิดบ้านวิชาการมหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ (KMUTNB Open House 2027) ภายใต้แนวคิด AI Plus EDUCATION โดยภาควิชาคอมพิวเตอร์ศึกษา (TCT)"
-                    },
-                    days: [
-                        {
-                            id: 'day-1',
-                            dayNum: 'DAY 1',
-                            date: '6 พฤศจิกายน 2569',
-                            title: 'เตรียมความพร้อม & จัดระบบบูธนิทรรศการ',
-                            duty: 'จัดเตรียมสถานที่ ติดตั้งเครื่องคอมพิวเตอร์ โครงงานสื่อการสอน AI และระบบเครือข่ายสำหรับบูธภาควิชาคอมพิวเตอร์ศึกษา (TCT) เพื่อให้พร้อมรับนักเรียนและผู้ปกครอง',
-                            photos: []
-                        },
-                        {
-                            id: 'day-2',
-                            dayNum: 'DAY 2',
-                            date: '7 พฤศจิกายน 2569',
-                            title: 'นำเสนอผลงาน & ประชาสัมพันธ์หลักสูตร',
-                            duty: 'สาธิตนวัตกรรม AI Plus EDUCATION และโครงงานของภาควิชา แนะนำแนวทางการศึกษาต่อในหลักสูตรครุศาสตร์อุตสาหกรรม และตอบข้อซักถามแก่นักเรียนระดับมัธยมศึกษาและอาชีวศึกษา',
-                            photos: []
-                        },
-                        {
-                            id: 'day-3',
-                            dayNum: 'DAY 3 / สรุปผล',
-                            date: '7 พฤศจิกายน 2569 (ช่วงปิดงาน)',
-                            title: 'สรุปผลการจัดงาน & รื้อถอนพื้นที่',
-                            duty: 'รวบรวมแบบประเมินความพึงพอใจของผู้เข้าร่วมชมงาน ตรวจนับและรื้อถอนอุปกรณ์คอมพิวเตอร์ สื่อการแสดง พร้อมทำความสะอาดส่งมอบพื้นที่ให้เรียบร้อย',
-                            photos: []
-                        }
-                    ]
-                };
-            }
-
-            const p = data.student || {};
-
-            // เติมข้อมูลนักศึกษา
-            document.getElementById('student-info-box').innerHTML = `
-                <img src="${p.avatar || 'https://via.placeholder.com/150'}" alt="${p.name}" class="student-avatar">
-                <div class="student-grid">
-                    <div>
-                        <div class="info-cell-label">ชื่อ - นามสกุล นักศึกษา:</div>
-                        <div class="info-cell-value">${p.name || '-'}</div>
-                    </div>
-                    <div>
-                        <div class="info-cell-label">รหัสนักศึกษา:</div>
-                        <div class="info-cell-value">${p.studentId || '-'}</div>
-                    </div>
-                    <div>
-                        <div class="info-cell-label">ภาควิชา / คณะ:</div>
-                        <div class="info-cell-value">${p.department || '-'} (${p.faculty || '-'})</div>
-                    </div>
-                    <div>
-                        <div class="info-cell-label">วิชาที่นำส่ง:</div>
-                        <div class="info-cell-value">${p.subject || '-'}</div>
-                    </div>
-                    <div>
-                        <div class="info-cell-label">อาจารย์ผู้สอน / ที่ปรึกษา:</div>
-                        <div class="info-cell-value">${p.teacher || '-'}</div>
-                    </div>
-                    <div>
-                        <div class="info-cell-label">วันที่จัดกิจกรรม:</div>
-                        <div class="info-cell-value">${p.eventDate || '6 - 7 พฤศจิกายน 2569'}</div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('report-summary-text').innerText = p.summary || 'รายงานการปฏิบัติหน้าที่ในกิจกรรม Open House';
-
-            // เติมข้อมูลรายวัน แสดงเฉพาะ "หน้าที่และความรับผิดชอบ"
-            const daysContainer = document.getElementById('academic-days-list');
-            if (data.days && data.days.length > 0) {
-                daysContainer.innerHTML = data.days.map((d) => {
-                    const photos = d.photos || [];
-                    const photosHtml = photos.length > 0 ? `
-                        <div class="report-photo-grid">
-                            ${photos.map((photo, idx) => `
-                                <div class="report-photo-card">
-                                    <img src="${photo.src}" alt="ภาพที่ ${idx + 1}">
-                                    <div class="report-photo-caption">
-                                        <strong>รูปที่ ${idx + 1}:</strong> ${photo.caption || 'ภาพการปฏิบัติหน้าที่'}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : '<div style="font-size:0.85rem; color:#94a3b8; margin:0.5rem 0 1rem 0;">(ไม่มีรูปภาพแนบในวันนี้)</div>';
-
-                    return `
-                        <article class="day-block">
-                            <div class="day-title-row">
-                                <div style="display:flex; align-items:center; gap:0.6rem;">
-                                    <span class="day-badge-academic">${d.dayNum || 'DAY'}</span>
-                                    <span class="day-name-academic">${d.title || ''}</span>
-                                </div>
-                                <span class="day-date-academic">📅 ${d.date || ''}</span>
-                            </div>
-
-                            ${photosHtml}
-
-                            <div class="duty-box">
-                                <div class="duty-label">📌 หน้าที่และความรับผิดชอบ:</div>
-                                <div class="duty-content">${d.duty || '-'}</div>
-                            </div>
-                        </article>
-                    `;
-                }).join('');
+            // ตรวจสอบว่ามีพารามิเตอร์ ?edit=true หรือไม่
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('edit') === 'true') {
+                toggleRealtimeEdit();
             }
         });
     </script>
