@@ -31,7 +31,7 @@
             padding: 1.5rem 1rem 3rem 1rem;
         }
 
-        /* Top Action Bar */
+        /* แถบเครื่องมือควบคุมด้านบน */
         .top-action-bar {
             max-width: 900px;
             margin: 0 auto 1.5rem auto;
@@ -78,10 +78,15 @@
             text-decoration: none;
         }
 
+        /* ซ่อนปุ่มแก้ไขเป็นค่าเริ่มต้น (สำหรับอาจารย์จะไม่เห็นเลย) */
         .btn-edit-toggle {
+            display: none;
             background: #f1f5f9;
             color: var(--km-dark);
             border: 1px solid var(--border-color);
+        }
+        .btn-edit-toggle.show-btn {
+            display: inline-flex;
         }
         .btn-edit-toggle:hover {
             background: #e2e8f0;
@@ -563,7 +568,9 @@
 
         <!-- หัวกระดาษเอกสารทางการ -->
         <section class="doc-header">
-            <div class="doc-badge">แบบประเมินและรายงานการปฏิบัติหน้าที่</div>
+            <div class="doc-badge" id="secret-unlock-badge" onclick="handleBadgeClick()" title="เอกสารฉบับทางการ" style="cursor:default; user-select:none;">
+                แบบประเมินและรายงานการปฏิบัติหน้าที่
+            </div>
             <h1 class="doc-title">รายงานผลการปฏิบัติงานเปิดบ้านวิชาการ มจพ. (KMUTNB OPEN HOUSE 2027)</h1>
             <p class="doc-subtitle">ภาควิชาคอมพิวเตอร์ศึกษา คณะครุศาสตร์อุตสาหกรรม มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ</p>
             <p class="doc-meta" id="doc-meta-date">เอกสารฉบับทางการ</p>
@@ -706,6 +713,34 @@
             }
         });
 
+        // รหัสผ่านสำหรับนักศึกษา (Default PIN: 1234)
+        const EDIT_PIN = '1234';
+        let secretClickCount = 0;
+        let secretClickTimer = null;
+
+        // สัมผัสป้าย 3 ครั้งเพื่อปลดล็อกโหมดแก้ไข
+        window.handleBadgeClick = function() {
+            secretClickCount++;
+            clearTimeout(secretClickTimer);
+            secretClickTimer = setTimeout(() => { secretClickCount = 0; }, 1200);
+
+            if (secretClickCount >= 3) {
+                secretClickCount = 0;
+                promptUnlock();
+            }
+        };
+
+        function promptUnlock() {
+            const entered = prompt('🔒 กรุณาใส่รหัสผ่าน 4 หลัก เพื่อแก้ไขข้อมูล:');
+            if (entered === EDIT_PIN) {
+                document.getElementById('btn-toggle-edit').classList.add('show-btn');
+                if (!isEditMode) toggleRealtimeEdit();
+                showSyncToast('ปลดล็อกโหมดแก้ไขสำเร็จ 🔓');
+            } else if (entered !== null) {
+                alert('❌ รหัสผ่านไม่ถูกต้อง อาจารย์หรือบุคคลอื่นไม่สามารถแก้ไขข้อมูลได้ครับ');
+            }
+        }
+
         // สลับโหมดแก้ไขเรียลไทม์
         window.toggleRealtimeEdit = function() {
             isEditMode = !isEditMode;
@@ -716,16 +751,16 @@
 
             if (isEditMode) {
                 btn.innerHTML = '🔒 ล็อกโหมดส่งอาจารย์ (เสร็จสิ้น)';
-                btn.classList.add('active');
+                btn.classList.add('active', 'show-btn');
                 icon.innerText = '✏️';
                 title.innerText = 'กำลังแก้ไขข้อมูลแบบเรียลไทม์ (คลิกพิมพ์ได้ทันที)';
                 showSyncToast('เปิดโหมดแก้ไขแล้ว แก้ข้อความได้ทันที ✏️');
             } else {
                 btn.innerHTML = '✏️ แก้ไขข้อมูล (เรียลไทม์)';
-                btn.classList.remove('active');
+                btn.classList.remove('active', 'show-btn'); // ซ่อนปุ่มกลับไปทันทีเมื่อล็อก
                 icon.innerText = '🔒';
                 title.innerText = 'รายงานฉบับส่งอาจารย์ (Official Report)';
-                showSyncToast('ล็อกโหมดส่งอาจารย์เรียบร้อย 🔒');
+                showSyncToast('ล็อกหน้ารายงานสำหรับส่งอาจารย์เรียบร้อย 🔒');
             }
         };
 
@@ -956,7 +991,7 @@
             // ตรวจสอบว่ามีพารามิเตอร์ ?edit=true หรือไม่
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('edit') === 'true') {
-                toggleRealtimeEdit();
+                promptUnlock();
             }
         });
     </script>
