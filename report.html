@@ -620,14 +620,24 @@
 
         async function loadData() {
             try {
-                // ดึงข้อมูลหลักจากเซิร์ฟเวอร์ data.json ก่อน เพื่อให้ทุกเครื่อง (iPad, มือถือ, คอม) เห็นตรงกัน 100%
-                const res = await fetch('data.json?t=' + Date.now());
-                if (res.ok) {
+                // ดึงข้อมูลล่าสุดจาก Cloud API ก่อน (ซิงก์ข้ามเครื่อง iPad / มือถือ / คอม / อาจารย์)
+                let res = null;
+                try {
+                    res = await fetch('/api/sync?t=' + Date.now());
+                } catch(e) {}
+
+                if (res && res.ok) {
                     appData = await res.json();
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
                 } else {
-                    const saved = localStorage.getItem(STORAGE_KEY);
-                    appData = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultData));
+                    const res2 = await fetch('data.json?t=' + Date.now());
+                    if (res2.ok) {
+                        appData = await res2.json();
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+                    } else {
+                        const saved = localStorage.getItem(STORAGE_KEY);
+                        appData = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultData));
+                    }
                 }
             } catch (e) {
                 const saved = localStorage.getItem(STORAGE_KEY);

@@ -47,24 +47,30 @@ const defaultData = {
 let appData = null;
 let currentFilter = 'all';
 
-// Load Data
+// Load Data from Cloud Database
 async function loadData() {
     try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            appData = JSON.parse(saved);
+        flashSaveNotice('กำลังโหลดข้อมูลล่าสุดจาก Cloud ☁️...');
+        let res = null;
+        try {
+            res = await fetch('/api/sync?t=' + Date.now());
+        } catch (e) {}
+
+        if (res && res.ok) {
+            appData = await res.json();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            flashSaveNotice('โหลดข้อมูลล่าสุดจาก Cloud สำเร็จ ✓');
         } else {
-            const res = await fetch('data.json?t=' + Date.now());
-            if (res.ok) {
-                appData = await res.json();
-                saveData(false);
+            const res2 = await fetch('data.json?t=' + Date.now());
+            if (res2.ok) {
+                appData = await res2.json();
             } else {
-                appData = JSON.parse(JSON.stringify(defaultData));
-                saveData(false);
+                const saved = localStorage.getItem(STORAGE_KEY);
+                appData = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultData));
             }
         }
     } catch (e) {
-        console.error("Failed to parse stored data:", e);
+        console.error("Failed to load data:", e);
         appData = JSON.parse(JSON.stringify(defaultData));
     }
     renderProfile();
@@ -73,20 +79,43 @@ async function loadData() {
 }
 
 const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('kmutnb_openhouse_sync') : null;
+let syncTimeout = null;
+
+function saveToCloud() {
+    clearTimeout(syncTimeout);
+    syncTimeout = setTimeout(async () => {
+        try {
+            flashSaveNotice('กำลังซิงก์ข้อมูลขึ้น Cloud ☁️...');
+            const res = await fetch('/api/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(appData)
+            });
+            if (res.ok) {
+                flashSaveNotice('✅ บันทึกขึ้น Cloud สำเร็จ! iPad และทุกเครื่องจะเห็นทันที');
+            } else {
+                flashSaveNotice('บันทึกในเครื่องแล้ว ✓');
+            }
+        } catch (e) {
+            flashSaveNotice('บันทึกในเครื่องแล้ว ✓');
+        }
+    }, 600);
+}
 
 // Save Data
 function saveData(showNotice = true) {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
         if (showNotice) {
-            flashSaveNotice('บันทึกข้อมูลและซิงก์เรียลไทม์แล้ว ✓');
+            flashSaveNotice('บันทึกข้อมูลเรียบร้อยแล้ว ✓');
         }
         if (syncChannel) {
             syncChannel.postMessage({ type: 'DATA_UPDATED', data: appData });
         }
+        saveToCloud();
     } catch (e) {
         console.warn("Storage quota may be reached:", e);
-        flashSaveNotice('⚠️ พื้นที่เก็บข้อมูลเต็ม แนะนำให้ลดขนาดรูปภาพ', true);
+        saveToCloud();
     }
 }
 
