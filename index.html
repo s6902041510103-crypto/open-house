@@ -618,17 +618,24 @@
 
         let appData = null;
 
-        function loadData() {
+        async function loadData() {
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) {
                     appData = JSON.parse(saved);
                 } else {
-                    appData = JSON.parse(JSON.stringify(defaultData));
+                    const res = await fetch('data.json?t=' + Date.now());
+                    if (res.ok) {
+                        appData = await res.json();
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+                    } else {
+                        appData = JSON.parse(JSON.stringify(defaultData));
+                    }
                 }
             } catch (e) {
                 appData = JSON.parse(JSON.stringify(defaultData));
             }
+            renderAll();
         }
 
         // ซิงก์ข้อมูลแบบเรียลไทม์ทันทีเมื่อแอดมินแก้ไขที่หน้า /admin

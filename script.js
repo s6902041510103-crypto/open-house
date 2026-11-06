@@ -48,19 +48,28 @@ let appData = null;
 let currentFilter = 'all';
 
 // Load Data
-function loadData() {
+async function loadData() {
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
             appData = JSON.parse(saved);
         } else {
-            appData = JSON.parse(JSON.stringify(defaultData));
-            saveData(false);
+            const res = await fetch('data.json?t=' + Date.now());
+            if (res.ok) {
+                appData = await res.json();
+                saveData(false);
+            } else {
+                appData = JSON.parse(JSON.stringify(defaultData));
+                saveData(false);
+            }
         }
     } catch (e) {
         console.error("Failed to parse stored data:", e);
         appData = JSON.parse(JSON.stringify(defaultData));
     }
+    renderProfile();
+    renderDayTabs();
+    renderDays();
 }
 
 const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('kmutnb_openhouse_sync') : null;
