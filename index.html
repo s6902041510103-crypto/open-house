@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เอกสารรายงานผลการปฏิบัติงาน Open House มจพ. (ฉบับส่งอาจารย์)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --km-orange: #f37021;
+            --km-dark: #1e293b;
+            --km-light: #f8fafc;
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Prompt', 'Sarabun', sans-serif;
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        /* Top Action Bar (เฉพาะปุ่มพิมพ์รายงานสำหรับอาจารย์/นักศึกษา ไม่มีปุ่มไปหน้าแก้ไข) */
+        .top-action-bar {
+            max-width: 900px;
+            margin: 0 auto 1.5rem auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: #ffffff;
+            padding: 0.85rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+        }
+
+        .action-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--km-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-print {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 1.25rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            background: var(--km-orange);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(243, 112, 33, 0.3);
+            transition: all 0.2s ease;
+        }
+        .btn-print:hover {
+            background: #d95e14;
+            transform: translateY(-1px);
+        }
+
+        /* Academic Report Paper Container */
+        .paper-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 1px solid var(--border-color);
+            padding: 2.5rem 3rem;
+        }
+
+        /* หัวกระดาษเอกสาร */
+        .doc-header {
+            text-align: center;
+            border-bottom: 2px solid var(--km-orange);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .doc-badge {
+            display: inline-block;
+            background: #fff7ed;
+            color: var(--km-orange);
+            border: 1px solid #fed7aa;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.3rem 0.8rem;
+            border-radius: 9999px;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .doc-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--km-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .doc-subtitle {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .doc-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* แบนเนอร์ 2 รูปต่อกัน */
+        .banner-wrapper {
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            background: #000;
+        }
+
+        .banner-wrapper img {
+            width: 100%;
+            height: auto;
+            display: block;
+            aspect-ratio: 2 / 1;
+            object-fit: cover;
+        }
+
+        /* ตารางข้อมูลนักศึกษา */
+        .student-info-section {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--km-orange);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .student-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--km-orange);
+            flex-shrink: 0;
+            background: #e2e8f0;
+        }
+
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.75rem 1.5rem;
+            width: 100%;
+        }
+
+        .info-cell-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .info-cell-value {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        /* ภาพรวม */
+        .summary-box {
+            background: #ffffff;
+            border: 1px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .summary-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--km-dark);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .summary-text {
+            font-size: 0.92rem;
+            color: #334155;
+            line-height: 1.7;
+        }
+
+        /* รายละเอียดกิจกรรมรายวัน (Daily Log Section) */
+        .section-header-academic {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--km-dark);
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .day-block {
+            margin-bottom: 2.25rem;
+            padding-bottom: 1.75rem;
+            border-bottom: 1px dashed var(--border-color);
+            page-break-inside: avoid;
+        }
+        .day-block:last-child {
+            border-bottom: none;
+            margin-bottom: 1rem;
+        }
+
+        .day-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .day-badge-academic {
+            background: var(--km-orange);
+            color: #ffffff;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+        }
+
+        .day-name-academic {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--km-dark);
+        }
+
+        .day-date-academic {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+
+        /* แกลเลอรีรูปภาพในรายงานส่งอาจารย์ */
+        .report-photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0 1.25rem 0;
+        }
+
+        .report-photo-card {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            page-break-inside: avoid;
+        }
+
+        .report-photo-card img {
+            width: 100%;
+            height: 190px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .report-photo-caption {
+            padding: 0.6rem 0.75rem;
+            font-size: 0.85rem;
+            color: #475569;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* ส่วนแสดงเฉพาะหน้าที่และความรับผิดชอบ */
+        .duty-box {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--km-orange);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .duty-label {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--km-orange);
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .duty-content {
+            font-size: 0.92rem;
+            color: #1e293b;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.75rem 0.5rem;
+            }
+            .paper-container {
+                padding: 1.25rem 1rem;
+            }
+            .student-info-section {
+                flex-direction: column;
+                text-align: center;
+            }
+            .student-grid {
+                grid-template-columns: 1fr;
+                text-align: left;
+            }
+            .report-photo-grid {
+                grid-template-columns: 1fr;
+            }
+            .top-action-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn-print {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Print Media Styles */
+        @media print {
+            body {
+                background: #ffffff !important;
+                padding: 0 !important;
+            }
+            .top-action-bar {
+                display: none !important;
+            }
+            .paper-container {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+            }
+            .btn-print {
+                display: none !important;
+            }
+            .banner-wrapper img {
+                max-height: 250px;
+                object-fit: contain;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- แถบด้านบนสำหรับอาจารย์ / ส่งงาน (ไม่มีปุ่มไปหน้าแก้ไข) -->
+    <header class="top-action-bar">
+        <div class="action-title">
+            <span>📄</span>
+            <span>รายงานผลการปฏิบัติหน้าที่ KMUTNB OPEN HOUSE 2027 (ฉบับส่งอาจารย์)</span>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn-print">
+                🖨️ พิมพ์รายงาน / บันทึกเป็น PDF
+            </button>
+        </div>
+    </header>
+
+    <!-- ตัวแผ่นกระดาษรายงาน -->
+    <main class="paper-container">
+
+        <!-- หัวกระดาษเอกสารทางการ -->
+        <section class="doc-header">
+            <div class="doc-badge">แบบประเมินและรายงานการปฏิบัติหน้าที่</div>
+            <h1 class="doc-title">รายงานผลการปฏิบัติงานเปิดบ้านวิชาการ มจพ. (KMUTNB OPEN HOUSE 2027)</h1>
+            <p class="doc-subtitle">ภาควิชาคอมพิวเตอร์ศึกษา คณะครุศาสตร์อุตสาหกรรม มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ</p>
+            <p class="doc-meta" id="doc-meta-date">เอกสารฉบับทางการ</p>
+        </section>
+
+        <!-- ภาพแบนเนอร์โปสเตอร์งาน Open House 2 รูปต่อกัน -->
+        <figure class="banner-wrapper">
+            <img src="openhouse_banner.png" alt="KMUTNB Open House 2027 AI Plus EDUCATION (Department of Computer Education)">
+        </figure>
+
+        <!-- ข้อมูลนักศึกษาผู้จัดทำ -->
+        <section class="student-info-section" id="student-info-box">
+            <!-- โหลดข้อมูลจาก JavaScript -->
+        </section>
+
+        <!-- วัตถุประสงค์และสรุปภาพรวม -->
+        <section class="summary-box">
+            <h2 class="summary-title">📌 วัตถุประสงค์และสรุปภาพรวมการปฏิบัติงาน</h2>
+            <p class="summary-text" id="report-summary-text"></p>
+        </section>
+
+        <!-- รายการบันทึกผลการปฏิบัติงานแต่ละวัน (แสดงเฉพาะหน้าที่) -->
+        <section>
+            <h2 class="section-header-academic">
+                <span>📅</span>
+                <span>บันทึกการปฏิบัติหน้าที่และภาพกิจกรรมประจำวัน</span>
+            </h2>
+
+            <div id="academic-days-list">
+                <!-- วนซ้ำแสดงข้อมูลของแต่ละวัน -->
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const STORAGE_KEY = 'kmutnb_openhouse_report_data_v2';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('doc-meta-date').innerText = `เอกสารฉบับทางการ | ออกรายงาน ณ วันที่ ${dateStr}`;
+
+            let data = null;
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    data = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error("Failed to load data", e);
+            }
+
+            if (!data) {
+                data = {
+                    student: {
+                        name: "ศุกลภัทร สุเมธรัตน์",
+                        studentId: "6x-xxxx-xxxx-x",
+                        faculty: "คณะครุศาสตร์อุตสาหกรรม",
+                        department: "ภาควิชาคอมพิวเตอร์ศึกษา (TCT)",
+                        subject: "รายงานผลการปฏิบัติงาน KMUTNB Open House 2027",
+                        teacher: "อาจารย์ประจำวิชา / ผู้ประเมินผล",
+                        eventDate: "6 - 7 พฤศจิกายน 2569",
+                        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
+                        summary: "รายงานผลการเข้าร่วมปฏิบัติหน้าที่และการจัดแสดงผลงานนวัตกรรม ในงานเปิดบ้านวิชาการมหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ (KMUTNB Open House 2027) ภายใต้แนวคิด AI Plus EDUCATION โดยภาควิชาคอมพิวเตอร์ศึกษา (TCT)"
+                    },
+                    days: [
+                        {
+                            id: 'day-1',
+                            dayNum: 'DAY 1',
+                            date: '6 พฤศจิกายน 2569',
+                            title: 'เตรียมความพร้อม & จัดระบบบูธนิทรรศการ',
+                            duty: 'จัดเตรียมสถานที่ ติดตั้งเครื่องคอมพิวเตอร์ โครงงานสื่อการสอน AI และระบบเครือข่ายสำหรับบูธภาควิชาคอมพิวเตอร์ศึกษา (TCT) เพื่อให้พร้อมรับนักเรียนและผู้ปกครอง',
+                            photos: []
+                        },
+                        {
+                            id: 'day-2',
+                            dayNum: 'DAY 2',
+                            date: '7 พฤศจิกายน 2569',
+                            title: 'นำเสนอผลงาน & ประชาสัมพันธ์หลักสูตร',
+                            duty: 'สาธิตนวัตกรรม AI Plus EDUCATION และโครงงานของภาควิชา แนะนำแนวทางการศึกษาต่อในหลักสูตรครุศาสตร์อุตสาหกรรม และตอบข้อซักถามแก่นักเรียนระดับมัธยมศึกษาและอาชีวศึกษา',
+                            photos: []
+                        },
+                        {
+                            id: 'day-3',
+                            dayNum: 'DAY 3 / สรุปผล',
+                            date: '7 พฤศจิกายน 2569 (ช่วงปิดงาน)',
+                            title: 'สรุปผลการจัดงาน & รื้อถอนพื้นที่',
+                            duty: 'รวบรวมแบบประเมินความพึงพอใจของผู้เข้าร่วมชมงาน ตรวจนับและรื้อถอนอุปกรณ์คอมพิวเตอร์ สื่อการแสดง พร้อมทำความสะอาดส่งมอบพื้นที่ให้เรียบร้อย',
+                            photos: []
+                        }
+                    ]
+                };
+            }
+
+            const p = data.student || {};
+
+            // เติมข้อมูลนักศึกษา
+            document.getElementById('student-info-box').innerHTML = `
+                <img src="${p.avatar || 'https://via.placeholder.com/150'}" alt="${p.name}" class="student-avatar">
+                <div class="student-grid">
+                    <div>
+                        <div class="info-cell-label">ชื่อ - นามสกุล นักศึกษา:</div>
+                        <div class="info-cell-value">${p.name || '-'}</div>
+                    </div>
+                    <div>
+                        <div class="info-cell-label">รหัสนักศึกษา:</div>
+                        <div class="info-cell-value">${p.studentId || '-'}</div>
+                    </div>
+                    <div>
+                        <div class="info-cell-label">ภาควิชา / คณะ:</div>
+                        <div class="info-cell-value">${p.department || '-'} (${p.faculty || '-'})</div>
+                    </div>
+                    <div>
+                        <div class="info-cell-label">วิชาที่นำส่ง:</div>
+                        <div class="info-cell-value">${p.subject || '-'}</div>
+                    </div>
+                    <div>
+                        <div class="info-cell-label">อาจารย์ผู้สอน / ที่ปรึกษา:</div>
+                        <div class="info-cell-value">${p.teacher || '-'}</div>
+                    </div>
+                    <div>
+                        <div class="info-cell-label">วันที่จัดกิจกรรม:</div>
+                        <div class="info-cell-value">${p.eventDate || '6 - 7 พฤศจิกายน 2569'}</div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('report-summary-text').innerText = p.summary || 'รายงานการปฏิบัติหน้าที่ในกิจกรรม Open House';
+
+            // เติมข้อมูลรายวัน แสดงเฉพาะ "หน้าที่และความรับผิดชอบ"
+            const daysContainer = document.getElementById('academic-days-list');
+            if (data.days && data.days.length > 0) {
+                daysContainer.innerHTML = data.days.map((d) => {
+                    const photos = d.photos || [];
+                    const photosHtml = photos.length > 0 ? `
+                        <div class="report-photo-grid">
+                            ${photos.map((photo, idx) => `
+                                <div class="report-photo-card">
+                                    <img src="${photo.src}" alt="ภาพที่ ${idx + 1}">
+                                    <div class="report-photo-caption">
+                                        <strong>รูปที่ ${idx + 1}:</strong> ${photo.caption || 'ภาพการปฏิบัติหน้าที่'}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<div style="font-size:0.85rem; color:#94a3b8; margin:0.5rem 0 1rem 0;">(ไม่มีรูปภาพแนบในวันนี้)</div>';
+
+                    return `
+                        <article class="day-block">
+                            <div class="day-title-row">
+                                <div style="display:flex; align-items:center; gap:0.6rem;">
+                                    <span class="day-badge-academic">${d.dayNum || 'DAY'}</span>
+                                    <span class="day-name-academic">${d.title || ''}</span>
+                                </div>
+                                <span class="day-date-academic">📅 ${d.date || ''}</span>
+                            </div>
+
+                            ${photosHtml}
+
+                            <div class="duty-box">
+                                <div class="duty-label">📌 หน้าที่และความรับผิดชอบ:</div>
+                                <div class="duty-content">${d.duty || '-'}</div>
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+            }
+        });
+    </script>
+</body>
+</html>
