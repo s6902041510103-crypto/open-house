@@ -620,20 +620,18 @@
 
         async function loadData() {
             try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    appData = JSON.parse(saved);
+                // ดึงข้อมูลหลักจากเซิร์ฟเวอร์ data.json ก่อน เพื่อให้ทุกเครื่อง (iPad, มือถือ, คอม) เห็นตรงกัน 100%
+                const res = await fetch('data.json?t=' + Date.now());
+                if (res.ok) {
+                    appData = await res.json();
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
                 } else {
-                    const res = await fetch('data.json?t=' + Date.now());
-                    if (res.ok) {
-                        appData = await res.json();
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-                    } else {
-                        appData = JSON.parse(JSON.stringify(defaultData));
-                    }
+                    const saved = localStorage.getItem(STORAGE_KEY);
+                    appData = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultData));
                 }
             } catch (e) {
-                appData = JSON.parse(JSON.stringify(defaultData));
+                const saved = localStorage.getItem(STORAGE_KEY);
+                appData = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultData));
             }
             renderAll();
         }
