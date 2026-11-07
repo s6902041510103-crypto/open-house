@@ -1,6 +1,6 @@
 {
   "student": {
-    "name": "ศ",
+    "name": "ศุ",
     "studentId": "6902041510103",
     "faculty": "คณะครุศาสตร์อุตสาหกรรม",
     "department": "ภาควิชาคอมพิวเตอร์ศึกษา (TCT)",
@@ -70,6 +70,6 @@
       ]
     }
   ],
-  "lastSyncedAt": 1794053294014,
+  "lastSyncedAt": 1794053296581,
   "lastBackendCheck": 1794045914453
 }
