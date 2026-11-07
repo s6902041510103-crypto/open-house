@@ -9,9 +9,9 @@ const FILE_PATH = 'data.json';
 function fetchRaw(url) {
     return new Promise((resolve, reject) => {
         https.get(url, { headers: { 'User-Agent': 'KMUTNB-OpenHouse-Sync' } }, (res) => {
-            let body = '';
-            res.on('data', c => body += c);
-            res.on('end', () => resolve(body));
+            const chunks = [];
+            res.on('data', c => chunks.push(c));
+            res.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
         }).on('error', reject);
     });
 }
@@ -29,15 +29,20 @@ function githubRequest(path, method, headers, data) {
                 ...headers
             }
         }, (res) => {
-            let body = '';
-            res.on('data', c => body += c);
+            const chunks = [];
+            res.on('data', c => chunks.push(c));
             res.on('end', () => {
+                const body = Buffer.concat(chunks).toString('utf8');
                 try { resolve({ status: res.statusCode, body: body ? JSON.parse(body) : null }); }
                 catch (e) { resolve({ status: res.statusCode, raw: body }); }
             });
         });
         req.on('error', reject);
-        if (data) req.write(typeof data === 'string' ? data : JSON.stringify(data));
+        if (data) {
+            const payloadStr = typeof data === 'string' ? data : JSON.stringify(data);
+            req.setHeader('Content-Length', Buffer.byteLength(payloadStr, 'utf8'));
+            req.write(payloadStr, 'utf8');
+        }
         req.end();
     });
 }
@@ -46,6 +51,7 @@ module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
@@ -82,20 +88,22 @@ module.exports = async (req, res) => {
                 return res.status(400).json({ error: 'Invalid data payload' });
             }
 
+            newData.lastSyncedAt = Date.now();
+
             const getResult = await githubRequest('/repos/' + REPO_OWNER + '/' + REPO_NAME + '/contents/' + FILE_PATH, 'GET');
             const sha = getResult.body ? getResult.body.sha : undefined;
 
-            const contentBase64 = Buffer.from(JSON.stringify(newData, null, 2)).toString('base64');
+            const contentBase64 = Buffer.from(JSON.stringify(newData, null, 2), 'utf8').toString('base64');
             const putPayload = {
                 message: 'Cloud Sync: update data.json from web',
                 content: contentBase64,
                 sha: sha
             };
 
-            const putResult = await githubRequest('/repos/' + REPO_OWNER + '/' + REPO_NAME + '/contents/' + FILE_PATH, 'PUT', { 'Content-Type': 'application/json' }, putPayload);
+            const putResult = await githubRequest('/repos/' + REPO_OWNER + '/' + REPO_NAME + '/contents/' + FILE_PATH, 'PUT', { 'Content-Type': 'application/json; charset=utf-8' }, putPayload);
 
             if (putResult.status === 200 || putResult.status === 201) {
-                return res.status(200).json({ success: true, message: 'Cloud database updated!' });
+                return res.status(200).json({ success: true, message: 'Cloud database updated!', syncedAt: newData.lastSyncedAt });
             } else {
                 return res.status(500).json({ error: 'Failed to commit', details: putResult });
             }

@@ -98,9 +98,12 @@ async function loadData() {
         }
     }
 
-    renderProfile();
-    renderDayTabs();
-    renderDays();
+    const isEditing = document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA');
+    if (!isEditing) {
+        renderProfile();
+        renderDayTabs();
+        renderDays();
+    }
 }
 
 const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('kmutnb_openhouse_sync') : null;
@@ -246,9 +249,9 @@ function renderProfile() {
                 </div>
                 <div class="profile-info">
                     <span class="academic-badge">แบบฟอร์มแก้ไขข้อมูลนักศึกษา</span>
-                    <input type="text" class="editable-input profile-name" value="${p.name}" placeholder="ชื่อ - นามสกุล" onchange="updateProfileField('name', this.value)">
+                    <input type="text" class="editable-input profile-name" value="${p.name}" placeholder="ชื่อ - นามสกุล" oninput="updateProfileField('name', this.value)">
                     <div style="margin-top: 4px;">
-                        <input type="text" class="editable-input" style="color:var(--text-secondary); font-size:1.05rem;" value="${p.department}" placeholder="ภาควิชา / สาขา" onchange="updateProfileField('department', this.value)">
+                        <input type="text" class="editable-input" style="color:var(--text-secondary); font-size:1.05rem;" value="${p.department}" placeholder="ภาควิชา / สาขา" oninput="updateProfileField('department', this.value)">
                     </div>
                 </div>
             </div>
@@ -256,25 +259,25 @@ function renderProfile() {
             <div class="profile-meta-grid">
                 <div class="meta-item">
                     <div class="meta-label">🎓 รหัสนักศึกษา:</div>
-                    <input type="text" class="editable-input" value="${p.studentId}" placeholder="รหัสนักศึกษา" onchange="updateProfileField('studentId', this.value)">
+                    <input type="text" class="editable-input" value="${p.studentId}" placeholder="รหัสนักศึกษา" oninput="updateProfileField('studentId', this.value)">
                 </div>
                 <div class="meta-item">
                     <div class="meta-label">🏛️ คณะ / มหาวิทยาลัย:</div>
-                    <input type="text" class="editable-input" value="${p.faculty}" placeholder="คณะ / สถาบัน" onchange="updateProfileField('faculty', this.value)">
+                    <input type="text" class="editable-input" value="${p.faculty}" placeholder="คณะ / สถาบัน" oninput="updateProfileField('faculty', this.value)">
                 </div>
                 <div class="meta-item">
                     <div class="meta-label">📚 รายวิชาที่นำส่ง:</div>
-                    <input type="text" class="editable-input" value="${p.subject}" placeholder="ชื่อวิชา / โครงงาน" onchange="updateProfileField('subject', this.value)">
+                    <input type="text" class="editable-input" value="${p.subject}" placeholder="ชื่อวิชา / โครงงาน" oninput="updateProfileField('subject', this.value)">
                 </div>
                 <div class="meta-item">
                     <div class="meta-label">👨‍🏫 อาจารย์ผู้สอน / ที่ปรึกษา:</div>
-                    <input type="text" class="editable-input" value="${p.teacher}" placeholder="ชื่ออาจารย์" onchange="updateProfileField('teacher', this.value)">
+                    <input type="text" class="editable-input" value="${p.teacher}" placeholder="ชื่ออาจารย์" oninput="updateProfileField('teacher', this.value)">
                 </div>
             </div>
 
             <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08);">
                 <div class="meta-label" style="margin-bottom:0.4rem;">📝 วัตถุประสงค์ / สรุปภาพรวมการปฏิบัติหน้าที่:</div>
-                <textarea class="editable-textarea" rows="2" placeholder="อธิบายภาพรวมกิจกรรม..." onchange="updateProfileField('summary', this.value)">${p.summary}</textarea>
+                <textarea class="editable-textarea" rows="2" placeholder="อธิบายภาพรวมกิจกรรม..." oninput="updateProfileField('summary', this.value)">${p.summary}</textarea>
             </div>
         </div>
     `;
@@ -369,10 +372,10 @@ function renderDays() {
                         <div class="day-badge-pill">
                             <span>📅</span> ${d.dayNum}
                         </div>
-                        <input type="text" class="editable-input day-card-title-input" value="${d.title}" placeholder="หัวข้อกิจกรรมประจำวัน" onchange="updateDayField('${d.id}', 'title', this.value)">
+                        <input type="text" class="editable-input day-card-title-input" value="${d.title}" placeholder="หัวข้อกิจกรรมประจำวัน" oninput="updateDayField('${d.id}', 'title', this.value)">
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.5rem;">
-                        <input type="text" class="editable-input day-card-date-input" value="${d.date}" placeholder="ระบุวันที่" onchange="updateDayField('${d.id}', 'date', this.value)">
+                        <input type="text" class="editable-input day-card-date-input" value="${d.date}" placeholder="ระบุวันที่" oninput="updateDayField('${d.id}', 'date', this.value)">
                         ${appData.days.length > 1 ? `
                             <button class="btn btn-danger" style="padding:0.25rem 0.65rem; font-size:0.75rem;" onclick="removeDay('${d.id}')">
                                 🗑️ ลบวันนี้
@@ -405,7 +408,7 @@ function renderDays() {
                     <div style="font-size: 0.95rem; font-weight: 700; color: var(--km-orange-light); margin-bottom: 0.5rem; display:flex; align-items:center; gap: 0.4rem;">
                         📌 หน้าที่และความรับผิดชอบที่ปฏิบัติในวันนี้:
                     </div>
-                    <textarea class="editable-textarea" rows="4" placeholder="พิมพ์อธิบายหน้าที่และกิจกรรมที่คุณทำในวันนี้ เช่น จัดเตรียมบูธ นำเสนอโครงงาน แนะนำหลักสูตร ดูแลระบบ..." onchange="updateDayField('${d.id}', 'duty', this.value)">${d.duty || ''}</textarea>
+                    <textarea class="editable-textarea" rows="4" placeholder="พิมพ์อธิบายหน้าที่และกิจกรรมที่คุณทำในวันนี้ เช่น จัดเตรียมบูธ นำเสนอโครงงาน แนะนำหลักสูตร ดูแลระบบ..." oninput="updateDayField('${d.id}', 'duty', this.value)">${d.duty || ''}</textarea>
                 </div>
             </article>
         `;
@@ -432,7 +435,7 @@ window.handleDayPhotosUpload = async function(dayId, event) {
 
     for (const file of files) {
         try {
-            const compressed = await compressImage(file, 1280, 0.82);
+            const compressed = await compressImage(file, 960, 0.65);
             day.photos.push({
                 id: Date.now() + Math.random().toString(),
                 src: compressed,
@@ -630,10 +633,19 @@ function setupCanvasParticles() {
     animate();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadData();
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Initial render immediately from local storage (0ms, no null error)
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) appData = JSON.parse(saved);
+    } catch(e) {}
+    if (!appData) appData = JSON.parse(JSON.stringify(defaultData));
+
     renderProfile();
     renderDayTabs();
     renderDays();
     setupCanvasParticles();
+
+    // 2. Load latest cloud data in background
+    await loadData();
 });
