@@ -1,7 +1,7 @@
 {
   "student": {
     "name": "ศุภภัทร สุพรรรัตน์",
-    "studentId": "690204151010103",
+    "studentId": "6902041510103",
     "faculty": "คณะครุศาสตร์อุตสาหกรรม",
     "department": "ภาควิชาคอมพิวเตอร์ศึกษา (TCT)",
     "subject": "รายงานผลการปฏิบัติงาน KMUTNB Open House 2027",
@@ -70,6 +70,6 @@
       ]
     }
   ],
-  "lastSyncedAt": 1794053277737,
+  "lastSyncedAt": 1794053282486,
   "lastBackendCheck": 1794045914453
 }
