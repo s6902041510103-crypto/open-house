@@ -77,6 +77,53 @@
             transform: translateY(-1px);
         }
 
+        .btn-refresh {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 1rem;
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: #f8fafc;
+            color: #334155;
+            transition: all 0.2s ease;
+        }
+        .btn-refresh:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+            transform: translateY(-1px);
+        }
+        .live-sync-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #059669;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            margin-left: 0.4rem;
+        }
+        .dot-live {
+            width: 7px;
+            height: 7px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 6px #10b981;
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
         /* Academic Report Paper Container */
         .paper-container {
             max-width: 900px;
@@ -523,8 +570,14 @@
         <div class="action-title">
             <span>📄</span>
             <span>รายงานผลการปฏิบัติหน้าที่ KMUTNB OPEN HOUSE 2027 (ฉบับส่งอาจารย์)</span>
+            <span class="live-sync-pill" id="live-sync-indicator" title="สถานะการเชื่อมต่อ Cloud">
+                <span class="dot-live"></span> เชื่อมต่อระบบ Cloud เรียบร้อย
+            </span>
         </div>
-        <div>
+        <div style="display: flex; gap: 0.6rem; align-items: center;">
+            <button onclick="loadData()" class="btn-refresh" title="รีเฟรชข้อมูลล่าสุดจากระบบ Cloud">
+                🔄 รีเฟรชข้อมูลล่าสุด
+            </button>
             <button onclick="window.print()" class="btn-print">
                 🖨️ พิมพ์รายงาน / บันทึกเป็น PDF
             </button>
@@ -619,31 +672,68 @@
         let appData = null;
 
         async function loadData() {
-            try {
-                // ดึงข้อมูลล่าสุดจาก Cloud API ก่อน (ซิงก์ข้ามเครื่อง iPad / มือถือ / คอม / อาจารย์)
-                let res = null;
-                try {
-                    res = await fetch('/api/sync?t=' + Date.now(), { cache: 'no-store' });
-                } catch(e) {}
+            const indicator = document.getElementById('live-sync-indicator');
+            if (indicator) {
+                indicator.innerHTML = '<span class="dot-live" style="background:#f59e0b; box-shadow:0 0 6px #f59e0b;"></span> กำลังโหลดข้อมูลล่าสุด...';
+            }
 
-                if (res && res.ok) {
-                    appData = await res.json();
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-                } else {
-                    const res2 = await fetch('data.json?t=' + Date.now(), { cache: 'no-store' });
-                    if (res2.ok) {
-                        appData = await res2.json();
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-                    } else {
-                        const saved = localStorage.getItem(STORAGE_KEY);
-                        appData = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultData));
+            let loaded = false;
+            try {
+                // 1. ดึงข้อมูลล่าสุดจาก Cloud API ก่อนเสมอ (ซิงก์ข้ามเครื่อง iPad / มือถือ / คอม / อาจารย์)
+                const res = await fetch('/api/sync?t=' + Date.now(), { cache: 'no-store' });
+                if (res.ok) {
+                    const cloudData = await res.json();
+                    if (cloudData && cloudData.student) {
+                        appData = cloudData;
+                        loaded = true;
+                        try {
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+                        } catch (quotaErr) {
+                            console.warn("Storage quota exceeded in local cache, using live cloud data:", quotaErr);
+                        }
                     }
                 }
             } catch (e) {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                appData = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultData));
+                console.warn("Cloud sync fetch error:", e);
             }
+
+            // 2. สำรอง: ถ้า API sync ไม่ตอบสนอง ดึงจาก data.json
+            if (!loaded) {
+                try {
+                    const res2 = await fetch('data.json?t=' + Date.now(), { cache: 'no-store' });
+                    if (res2.ok) {
+                        const fileData = await res2.json();
+                        if (fileData && fileData.student) {
+                            appData = fileData;
+                            loaded = true;
+                            try {
+                                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+                            } catch (quotaErr) {}
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            // 3. สำรองสุดท้าย: ดึงจากแคชในเครื่อง
+            if (!loaded) {
+                try {
+                    const saved = localStorage.getItem(STORAGE_KEY);
+                    if (saved) {
+                        appData = JSON.parse(saved);
+                        loaded = true;
+                    }
+                } catch (e) {}
+            }
+
+            if (!loaded || !appData) {
+                appData = JSON.parse(JSON.stringify(defaultData));
+            }
+
             renderAll();
+
+            if (indicator) {
+                indicator.innerHTML = '<span class="dot-live"></span> เชื่อมต่อระบบ Cloud เรียบร้อย';
+            }
         }
 
         // ซิงก์ข้อมูลแบบเรียลไทม์ทันทีเมื่อแอดมินแก้ไขที่หน้า /admin
@@ -783,7 +873,6 @@
             document.getElementById('doc-meta-date').innerText = `เอกสารฉบับทางการ | ออกรายงาน ณ วันที่ ${dateStr}`;
 
             loadData();
-            renderAll();
         });
     </script>
 </body>

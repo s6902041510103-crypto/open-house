@@ -49,6 +49,7 @@ let currentFilter = 'all';
 
 // Load Data from Cloud Database
 async function loadData() {
+    let loadedFromCloud = false;
     try {
         flashSaveNotice('กำลังโหลดข้อมูลล่าสุดจาก Cloud ☁️...');
         let res = null;
@@ -57,22 +58,46 @@ async function loadData() {
         } catch (e) {}
 
         if (res && res.ok) {
-            appData = await res.json();
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-            flashSaveNotice('โหลดข้อมูลล่าสุดจาก Cloud สำเร็จ ✓');
-        } else {
-            const res2 = await fetch('data.json?t=' + Date.now(), { cache: 'no-store' });
-            if (res2.ok) {
-                appData = await res2.json();
-            } else {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                appData = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultData));
+            const data = await res.json();
+            if (data && data.student) {
+                appData = data;
+                loadedFromCloud = true;
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+                } catch (quotaErr) {
+                    console.warn("Storage quota exceeded in local cache:", quotaErr);
+                }
+                flashSaveNotice('โหลดข้อมูลล่าสุดจาก Cloud สำเร็จ ✓');
             }
         }
     } catch (e) {
-        console.error("Failed to load data:", e);
-        appData = JSON.parse(JSON.stringify(defaultData));
+        console.warn("Cloud load attempt failed:", e);
     }
+
+    if (!loadedFromCloud) {
+        try {
+            const res2 = await fetch('data.json?t=' + Date.now(), { cache: 'no-store' });
+            if (res2.ok) {
+                const data2 = await res2.json();
+                if (data2 && data2.student) {
+                    appData = data2;
+                    try {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+                    } catch (quotaErr) {}
+                }
+            }
+        } catch (e) {}
+    }
+
+    if (!appData) {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            appData = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultData));
+        } catch (e) {
+            appData = JSON.parse(JSON.stringify(defaultData));
+        }
+    }
+
     renderProfile();
     renderDayTabs();
     renderDays();
@@ -80,6 +105,42 @@ async function loadData() {
 
 const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('kmutnb_openhouse_sync') : null;
 let syncTimeout = null;
+
+// Explicit button to sync to cloud immediately with full alert feedback
+async function syncCloudNow() {
+    const btn = document.getElementById('btn-sync-cloud');
+    const oldText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ กำลังซิงก์ขึ้น Cloud...';
+    }
+    flashSaveNotice('กำลังซิงก์ข้อมูลขึ้น Cloud ☁️...');
+
+    try {
+        const res = await fetch('/api/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(appData)
+        });
+
+        if (res.ok) {
+            flashSaveNotice('✅ ซิงก์ขึ้น Cloud สำเร็จ! ทุกเครื่องจะเห็นข้อมูลตรงกันทันที');
+            alert('✅ บันทึกขึ้น Cloud สำเร็จเรียบร้อยแล้ว!\n\nข้อมูลนี้จะอัปเดตไปยังหน้ารายงานของอาจารย์ และทุกเครื่อง (iPad / มือถือ / คอมพิวเตอร์) ทันที');
+        } else {
+            const errJson = await res.json().catch(() => ({}));
+            flashSaveNotice('❌ ไม่สามารถบันทึกขึ้น Cloud ได้: ' + (errJson.error || res.status), true);
+            alert('⚠️ ไม่สามารถบันทึกขึ้น Cloud ได้: ' + (errJson.error || 'สถานะ ' + res.status));
+        }
+    } catch (e) {
+        flashSaveNotice('❌ การเชื่อมต่อขัดข้อง: ' + e.message, true);
+        alert('⚠️ การเชื่อมต่อ Cloud ขัดข้อง: ' + e.message);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = oldText;
+        }
+    }
+}
 
 function saveToCloud() {
     clearTimeout(syncTimeout);
@@ -106,17 +167,16 @@ function saveToCloud() {
 function saveData(showNotice = true) {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-        if (showNotice) {
-            flashSaveNotice('บันทึกข้อมูลเรียบร้อยแล้ว ✓');
-        }
-        if (syncChannel) {
-            syncChannel.postMessage({ type: 'DATA_UPDATED', data: appData });
-        }
-        saveToCloud();
     } catch (e) {
-        console.warn("Storage quota may be reached:", e);
-        saveToCloud();
+        console.warn('Storage quota may be reached in localStorage:', e);
     }
+    if (showNotice) {
+        flashSaveNotice('บันทึกข้อมูลเรียบร้อยแล้ว ✓');
+    }
+    if (syncChannel) {
+        syncChannel.postMessage({ type: 'DATA_UPDATED', data: appData });
+    }
+    saveToCloud();
 }
 
 // Flash Notification
@@ -132,7 +192,7 @@ function flashSaveNotice(msg, isError = false) {
 }
 
 // Compress uploaded images
-function compressImage(file, maxDimension = 1200, quality = 0.8) {
+function compressImage(file, maxDimension = 960, quality = 0.65) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
