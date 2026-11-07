@@ -623,14 +623,14 @@
                 // ดึงข้อมูลล่าสุดจาก Cloud API ก่อน (ซิงก์ข้ามเครื่อง iPad / มือถือ / คอม / อาจารย์)
                 let res = null;
                 try {
-                    res = await fetch('/api/sync?t=' + Date.now());
+                    res = await fetch('/api/sync?t=' + Date.now(), { cache: 'no-store' });
                 } catch(e) {}
 
                 if (res && res.ok) {
                     appData = await res.json();
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
                 } else {
-                    const res2 = await fetch('data.json?t=' + Date.now());
+                    const res2 = await fetch('data.json?t=' + Date.now(), { cache: 'no-store' });
                     if (res2.ok) {
                         appData = await res2.json();
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));

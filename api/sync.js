@@ -6,6 +6,16 @@ const REPO_OWNER = 's6902041510103-crypto';
 const REPO_NAME = 'open-house';
 const FILE_PATH = 'data.json';
 
+function fetchRaw(url) {
+    return new Promise((resolve, reject) => {
+        https.get(url, { headers: { 'User-Agent': 'KMUTNB-OpenHouse-Sync' } }, (res) => {
+            let body = '';
+            res.on('data', c => body += c);
+            res.on('end', () => resolve(body));
+        }).on('error', reject);
+    });
+}
+
 function githubRequest(path, method, headers, data) {
     return new Promise((resolve, reject) => {
         const req = https.request({
@@ -44,12 +54,22 @@ module.exports = async (req, res) => {
     try {
         if (req.method === 'GET') {
             const result = await githubRequest('/repos/' + REPO_OWNER + '/' + REPO_NAME + '/contents/' + FILE_PATH, 'GET');
-            if (result.status === 200 && result.body && result.body.content) {
-                const contentStr = Buffer.from(result.body.content, 'base64').toString('utf8');
-                res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            if (result.status === 200 && result.body) {
+                let contentStr = '';
+                if (result.body.content) {
+                    contentStr = Buffer.from(result.body.content, 'base64').toString('utf8');
+                } else if (result.body.download_url) {
+                    contentStr = await fetchRaw(result.body.download_url);
+                } else {
+                    contentStr = await fetchRaw('https://raw.githubusercontent.com/' + REPO_OWNER + '/' + REPO_NAME + '/main/' + FILE_PATH);
+                }
+                res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+                res.setHeader('Pragma', 'no-cache');
                 return res.status(200).json(JSON.parse(contentStr));
             } else {
-                return res.status(500).json({ error: 'Failed to fetch from GitHub', details: result });
+                const raw = await fetchRaw('https://raw.githubusercontent.com/' + REPO_OWNER + '/' + REPO_NAME + '/main/' + FILE_PATH);
+                res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+                return res.status(200).json(JSON.parse(raw));
             }
         }
 

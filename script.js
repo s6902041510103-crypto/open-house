@@ -53,7 +53,7 @@ async function loadData() {
         flashSaveNotice('กำลังโหลดข้อมูลล่าสุดจาก Cloud ☁️...');
         let res = null;
         try {
-            res = await fetch('/api/sync?t=' + Date.now());
+            res = await fetch('/api/sync?t=' + Date.now(), { cache: 'no-store' });
         } catch (e) {}
 
         if (res && res.ok) {
@@ -61,7 +61,7 @@ async function loadData() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
             flashSaveNotice('โหลดข้อมูลล่าสุดจาก Cloud สำเร็จ ✓');
         } else {
-            const res2 = await fetch('data.json?t=' + Date.now());
+            const res2 = await fetch('data.json?t=' + Date.now(), { cache: 'no-store' });
             if (res2.ok) {
                 appData = await res2.json();
             } else {
