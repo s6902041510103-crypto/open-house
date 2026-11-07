@@ -808,15 +808,7 @@
 
                     const collageItems = photos.map((photo, idx) => `
                         <div class="collage-item" onclick="openLightbox('${photo.src}')">
-                            <img src="${photo.src}" alt="ภาพกิจกรรมรูปที่ ${idx + 1}" loading="lazy">
-                            <span class="photo-number-tag">รูปที่ ${idx + 1}</span>
-                        </div>
-                    `).join('');
-
-                    const captionsList = photos.map((photo, idx) => `
-                        <div class="collage-caption-item">
-                            <span class="collage-caption-tag">รูปที่ ${idx + 1}:</span>
-                            <span>${photo.caption || 'ภาพการปฏิบัติหน้าที่'}</span>
+                            <img src="${photo.src}" alt="ภาพกิจกรรม" loading="lazy">
                         </div>
                     `).join('');
 
@@ -824,9 +816,6 @@
                         <div class="photo-frame-wrapper">
                             <div class="collage-container ${countClass}">
                                 ${collageItems}
-                            </div>
-                            <div class="collage-caption-bar">
-                                ${captionsList}
                             </div>
                         </div>
                     `;
@@ -870,7 +859,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date();
             const dateStr = today.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
-            document.getElementById('doc-meta-date').innerText = `เอกสารฉบับทางการ | ออกรายงาน ณ วันที่ ${dateStr}`;
+            document.getElementById('doc-meta-date').innerText = `เอกสารฉบับทางการ | บันทึกรายงาน ณ วันที่ ${dateStr}`;
 
             loadData();
         });
